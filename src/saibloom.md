@@ -154,11 +154,12 @@ Static data:
 
 ### .state attribute
 
-Recover / restore the filter's present state.
+Recover / restore the filter's current state.
 
 - On _get_: return the filter's state as a plain JS object.
-- On _set_: set the filter's state to a value previously retrieved
- 
+- On _set_: set the filter's state to a value previously retrieved.
+
+Implementation:
 
     state get
       return:
@@ -189,6 +190,7 @@ Otherwise, to create an empty filter with manual configuration:
 - __bits__: (as p) number of bits in the filter (will be rounded up to an even 32)
 - __rounds__: number of hash rounds to run, e.g. number of bits to set per Add
  
+Implemenation:
 
     Instantiate task given p, rounds_
 
@@ -214,6 +216,7 @@ Set up arrays, inilialize state, filter empty.
  - __bits__:: number of bits in the filter
  - __rounds__: number of bits to set per add
  
+Implementation:
 
     Configure task given bits_, rounds_
       set
@@ -227,11 +230,10 @@ Set up arrays, inilialize state, filter empty.
 ### Add method
 
 Add a stringable item to the filter. 
-
-The item is marked as having been added, though you cannot recover or remove it later.  All you can do is validate for sure whether it has __not__ been added, or has __probably__ been added.
  
  - __item__: must either be a string or have a `.toString()` method
  
+The item is marked as having been added, though you cannot recover or remove it later.  All you can do is validate for sure whether it has __not__ been added, or has __probably__ been added.
  
     Add task given item
       set
@@ -258,6 +260,7 @@ Returns
  - `false` if item has not been added
  - `true` if it probably has been added
  
+Implementation:
  
     Test task given item     
       set
