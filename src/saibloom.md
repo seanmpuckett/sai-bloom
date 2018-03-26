@@ -48,12 +48,12 @@ The following are the results of a performance test, running 100K unique items i
 Hash counts 2-16 were tested for each bit size, the row shown is the best (fewest false pasitives)
 
 Beyond 20 bits per item to be stored, there were no false positives found in the best row.
-    
-Test method: A bloom filter was created with _n_ bits allocated per anticipated item to be stored. That number of unique items (100K) were stored in the filter. Then the filter was queried with 1M unique items known not to be in the filter. Time is for queries alone, not insertions (which run about the same speed as queries).
 
 ### Performance
 
 Roughly 4-5M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. 
+
+This estimate is for short-ish items on the order of 1-10 characters. Longer items will take somewhat longer to hash.
 
 ### Configuring to your needs
 
@@ -65,7 +65,9 @@ In this example, if you have 1M items, that gives you 6M bits at 4 hashes, so yo
 
 ### Autoconfiguration
 
-You can also autoconfigure the filter if you give it an estimated number of items and an allowed failure rate.  Pass in an object with these attributes:
+You can also autoconfigure the filter by initializing it with an estimated number of items and an allowed failure rate.  
+
+Pass in an object with these attributes:
 
 - __size__: approximate number of items you'd like to store
 - __rate__: minimum acceptable rate of failure, as a decimal fraction (e.g. 5% = 0.05).
