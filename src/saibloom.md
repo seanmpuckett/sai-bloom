@@ -156,9 +156,9 @@ Static data:
 
 Recover / restore the filter's present state.
 
-On _get_: return the filter's state as a plain JS object.
-On _set_: set the filter's state to a value previously retrieved
-
+- On _get_: return the filter's state as a plain JS object.
+- On _set_: set the filter's state to a value previously retrieved
+ 
 
     state get
       return:
@@ -186,10 +186,10 @@ If passed an autoconfiguration object, will choose suitable parameters
 
 Otherwise, to create an empty filter with manual configuration:
 
- - __bits__: (as p) number of bits in the filter (will be rounded up to an even 32)
- - __rounds__: number of hash rounds to run, e.g. number of bits to set per Add
+- __bits__: (as p) number of bits in the filter (will be rounded up to an even 32)
+- __rounds__: number of hash rounds to run, e.g. number of bits to set per Add
  
- 
+
     Instantiate task given p, rounds_
 
       if p.bits       // did we get a state object?
@@ -206,6 +206,7 @@ Otherwise, to create an empty filter with manual configuration:
         Configure p, rounds_
 
 
+
 ### Configure method
 
 Set up arrays, inilialize state, filter empty.
@@ -213,12 +214,14 @@ Set up arrays, inilialize state, filter empty.
  - __bits__:: number of bits in the filter
  - __rounds__: number of bits to set per add
  
+
     Configure task given bits_, rounds_
       set
         bucketcount Math.ceil(bits_ / 32)
         bits bucketcount * 32
         rounds rounds_
         buckets new ~Uint32Array bucketcount
+
 
 
 ### Add method
@@ -228,6 +231,7 @@ Add a stringable item to the filter.
 The item is marked as having been added, though you cannot recover or remove it later.  All you can do is validate for sure whether it has __not__ been added, or has __probably__ been added.
  
  - __item__: must either be a string or have a `.toString()` method
+ 
  
     Add task given item
       set
@@ -240,6 +244,7 @@ The item is marked as having been added, though you cannot recover or remove it 
         set loc to x<0 ?? (x+bits) :: x
         set buckets[loc rsh 5] orb (1 lsh (loc andb 0x1f))
         set x to (self+b) % bits
+
 
 
 ### Test method
@@ -270,6 +275,7 @@ Returns
       return true
 
 
+
 ### Cardinality method
 
 Return an estimate of how many things are stored in the filter.
@@ -280,6 +286,7 @@ If it is, then the filter probably doesn't have enough bits.
     Cardinality task 
       set bitcount to buckets | total using Bitcount
       return (-bits * Math.log(1-bitcount/bits)) / rounds
+
 
 
 ### Internal functions

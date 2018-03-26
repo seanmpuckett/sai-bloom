@@ -1,0 +1,148 @@
+#! /usr/bin/env sai-run
+
+
+reference:
+  SaiBloom  '../src/saibloom'
+
+
+object Test
+
+Instantiate task
+
+  set bloom to create SaiBloom 2**9, 5
+  
+  bloom.Add "hit the road, jack"
+
+  assert bloom.Test("fnoop") is false, "fnoop should not exist"
+  assert bloom.Test("hit the road, jack") is true, "hit the road, jack should exist"
+  
+  set bloom to create SaiBloom 1000, 4
+  bloom.Add 1
+  assert bloom.Test(1) is true, "digit 1 should exist"
+  assert bloom.Test(2) is false, "digit 2 should not exist"
+  
+  count 100
+    bloom.Add counter
+  assert Math.floor(bloom.Cardinality()*100) is 9995, "cardinality of 100 adds should be about 99.95"
+  set state to bloom.state
+  count 1000
+    bloom.Add counter
+  assert Math.floor(bloom.Cardinality()*100) is 95042, "cardinality of 1000 adds should be about 950.42"
+  
+  set bloom to create SaiBloom 20, 10
+  bloom.Add "number one crush"
+  assert bloom.Test("number one crush"), "crush test should find added key"
+  assert not bloom.Test("number two crush"), "crush test should not find non-added key"
+  
+  delete bloom
+  set newbloom to create SaiBloom state
+  assert newbloom.Test(1) is true, "restored filter should have digit 1"
+  assert newbloom.Test(101) is false, "restored filter should not have digit 101"
+  assert Math.floor(newbloom.Cardinality()*100) is 9995, "restored filter should have cardinality of about 99.95"
+
+  set bloom to create SaiBloom: size 50, rate 0.1
+  assert bloom.bits is 256, "autoconfigure bits should be 256"
+  assert bloom.rounds is 4, "autoconfigure rounds should be 4"
+
+  set success to false
+  try
+    set bloom to create SaiBloom: size 50, rate -4
+  catch
+    set success to true
+  assert success, "garbage autoconfig should have failed"
+
+  debug "Bloom filter looks good."
+  
+
+Characterize task
+
+  set t1 new ~Date
+  set d 10000
+  set found 0
+  set bloom to create SaiBloom d*3, 2
+  count d
+    bloom.Add counter
+  set t2 new ~Date
+  count d*10
+    if !bloom.Test counter 
+      if counter>=d
+        inc found
+  set t3 new ~Date
+  set d10 Math.floor(d/10)
+  count 10
+    count d10, d+d10
+      if !bloom.Test counter
+        if counter>=d
+          inc found
+  set t4 new ~Date
+  
+  debug "Time to add ${d} items: ${t2-t1}ms."
+  debug "Time to check ${d*10} items, 90% not there: ${t3-t2}ms."
+  debug "Time to check ${d*10} items, 90% there: ${t4-t3}ms."
+  debug "Got ${10*found/d}% false positives"
+  
+  
+  set d 100000
+  set results empty
+
+  set NiceNum to task 
+    if $>=1000000
+      return '${$/1000000}M'
+    if $>=1000
+      return '${$/1000}K'
+    return $
+      
+  set Format to task
+    debug '${$bits}bits @ ${$rounds} hashes: ${Math.floor($fp*10000)/100}% false positives against ${NiceNum(d)} items in ${NiceNum($size)} bytes, ${NiceNum(d*10)} queries in ${$time}ms'
+
+  count 2, 33 as bits
+    count 2, 17 as rounds
+      set fp 0
+      set bloom to create SaiBloom d*bits, rounds
+      count d
+        bloom.Add counter
+      set t1 new ~Date
+      count d, d*11
+        if !bloom.Test counter
+          inc fp
+      set t2 new ~Date
+      results.push:
+        time t2-t1
+        bits bits
+        rounds rounds
+        fp fp/(d*10)
+        size bloom.bits/8
+    Format results | has .bits is bits | lowest .fp 
+      
+  set whatever '''
+    Bloom filter characterization (2012 Retina MacBook Pro, single threaded, Node 9.3)
+
+     2bits @ 2 hashes: 40.08% false positives against 100K items in 25K bytes,    1M queries in 233ms
+     3bits @ 2 hashes: 23.73% false positives against 100K items in 37.5K bytes,  1M queries in 231ms
+     4bits @ 3 hashes: 14.75% false positives against 100K items in 50K bytes,    1M queries in 223ms
+     5bits @ 4 hashes:  9.15% false positives against 100K items in 62.5K bytes,  1M queries in 215ms
+     6bits @ 4 hashes:  5.60% false positives against 100K items in 75K bytes,    1M queries in 217ms
+     7bits @ 5 hashes:  3.48% false positives against 100K items in 87.5K bytes,  1M queries in 213ms
+     8bits @ 6 hashes:  2.16% false positives against 100K items in 100K bytes,   1M queries in 220ms
+     9bits @ 6 hashes:  1.33% false positives against 100K items in 112.5K bytes, 1M queries in 216ms
+    10bits @ 7 hashes:  0.82% false positives against 100K items in 125K bytes,   1M queries in 213ms
+    11bits @ 7 hashes:  0.50% false positives against 100K items in 137.5K bytes, 1M queries in 218ms
+    12bits @ 8 hashes:  0.32% false positives against 100K items in 150K bytes,   1M queries in 217ms
+    13bits @ 9 hashes:  0.19% false positives against 100K items in 162.5K bytes, 1M queries in 214ms
+    14bits @ 9 hashes:  0.11% false positives against 100K items in 175K bytes,   1M queries in 218ms
+    15bits @ 12 hashes: 0.07% false positives against 100K items in 187.5K bytes, 1M queries in 222ms
+    16bits @ 10 hashes: 0.04% false positives against 100K items in 200K bytes,   1M queries in 229ms
+    17bits @ 11 hashes: 0.02% false positives against 100K items in 212.5K bytes, 1M queries in 230ms
+    18bits @ 11 hashes: 0.01% false positives against 100K items in 225K bytes,   1M queries in 205ms
+    19bits @ 15 hashes: 0.01% false positives against 100K items in 237.5K bytes, 1M queries in 228ms
+    20bits @ 15 hashes: 0.00% false positives against 100K items in 250K bytes,   1M queries in 233ms
+  
+    Hash counts 2-16 were tested for each bit size, the row shown is the best (fewest false pasitives)
+    Beyond 21 bits per item to be stored, there were no false positives found in the best row.
+    
+    Test method: A bloom filter was created with _n_ bits allocated per anticipated item to be stored.
+    That number of unique items (100K) were stored in the filter. Then the filter was queried with 1M
+    unique items known not to be in the filter.stored. Time is for queries alone, not insertions 
+    (which run about the same speed as queries).
+    
+    
