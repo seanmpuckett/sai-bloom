@@ -6,6 +6,8 @@ Note: Assumes platform support for Uint32Array, which is a pretty safe assumptio
 
 Written by Sean M Puckett <mailto:seanmpuckett@gmail.com>.  MIT License (appears at end of file).
 
+_This package is usable in pure Javascript projects. SAI is only needed to recompile it._
+
 
 ### What's a Bloom filter?
 
@@ -79,7 +81,7 @@ It's important to note that even if you ask for a zero false positive rate, ther
 
 Manual configuration:
     
-    var SaiBloom=require('saibloom')                      // example
+    var SaiBloom=require('sai-bloom')                      // example
     var bloom=new SaiBloom(1000*10,7)       
     bloom.Add(1)
     console.log(bloom.Test(1)) // true
@@ -284,7 +286,8 @@ Implementation:
 Return an estimate of how many things are stored in the filter.
 
 This should not be appreciably lower than the actual number of things.
-If it is, then the filter probably doesn't have enough bits.
+If it is, then the bit count is too small for the number of items you're trying to store in the filter.
+The more items you insert for a given bitcount, the more risk of false positives you will get.
 
     Cardinality task 
       set bitcount to buckets | total using Bitcount
