@@ -1,0 +1,22 @@
+{
+  "name": "sai-bloom",
+  "version": "1.0.0",
+  "description": "Object-oriented bloom filter written in SAI.",
+  "main": "lib/saibloom.js",
+  "scripts": {
+    "prepare": "sai-build -o lib src",
+    "test": "sai-build -o lib src && cd test && sai-run test.sai"
+  },
+  "keywords": [
+    "bloom filter",
+    "sai"
+  ],
+  "dependencies": {
+    "sai-library": "^1.0.17"
+  },
+  "devDependencies": {
+    "sai-language": "^0.2.4"
+  },
+  "author": "Sean M Puckett <seanmpuckett@gmail.com>",
+  "license": "MIT"
+}
