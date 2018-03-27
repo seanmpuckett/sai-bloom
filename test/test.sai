@@ -5,7 +5,7 @@ reference:
   SaiBloom  '../src/saibloom'
 
 
-object Test
+object Test main
 
 Instantiate task
 
@@ -34,7 +34,7 @@ Instantiate task
   assert bloom.Test("number one crush"), "crush test should find added key"
   assert not bloom.Test("number two crush"), "crush test should not find non-added key"
   
-  delete bloom
+  set bloom undefined
   set newbloom to create SaiBloom state
   assert newbloom.Test(1) is true, "restored filter should have digit 1"
   assert newbloom.Test(101) is false, "restored filter should not have digit 101"

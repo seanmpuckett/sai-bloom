@@ -21,9 +21,25 @@ From Wikipedia:
 
 Note that SaiBloom is not a 'counting' filter, as described above. One cannot remove items from it.
 
-### Characterization
+### Performance
 
-The following are the results of a performance test, running 100K unique items into a filter with the given number of bits per item, then checking 1M different unique items (which should be not be found) against the filter. 
+The filter does not get slower (or take up more memory) when more things are added. The configuration size of the filter is the final size. Adding more items just gradually increases the probability of false positives.
+
+Roughly 4-5M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. (This estimate is for short-ish items on the order of 1-10 characters. Longer items will take somewhat longer to hash.)
+
+### False positives characterization
+
+I wanted to understand filter performance across bits-per-item and number of hash rounds, so I undertook a 2-dimensional characterization iterating from 2-32 _bits-per-item_, and 2-16 _rounds_. 
+
+For each test case:
+
+- A filter was created with 100K * _bits_ and the given number of _rounds_.
+- Then 100K unique items were _Add_ed. 
+- The filter was then _Test_ed 1M times, each with a different unique item. 
+- The desired outcome is that each _Test_ would return `false`. 
+- The percentage of times it returned `true` instead, is the _false positive rate_.
+
+The number of _rounds_ affects the false positive rate. For each number of _bits_, there is an optimum number of _rounds_ that produces the fewest false positives in this test suite. In the results below, only the number of _rounds_ per _bits_ producing the _best results_ (i.e. the lowest false positive rate) is shown. A cursory examination suggests choosing a number of _rounds_ that is about 2/3 the number of _bits_ will produce the best results.
 
 - 2 bits @ 2 hashes: 40.08% false positives
 - 3 bits @ 2 hashes: 23.73%
@@ -45,25 +61,17 @@ The following are the results of a performance test, running 100K unique items i
 - 19 bits @ 15 hashes: 0.01% 
 - 20 bits @ 15 hashes: 0.00% 
   
-Hash counts 2-16 were tested for each bit size, the row shown is the best (fewest false pasitives)
+Beyond 20 bits per item to be stored, there were no false positives found in the best row, though this is just a statistical null result rather than a provable one -- it is always _possible_ for a Bloom filter to fail, it just gets more and more unlikely the more bits have been set aside per item.
 
-Beyond 20 bits per item to be stored, there were no false positives found in the best row.
-
-### Performance
-
-Roughly 4-5M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. 
-
-This estimate is for short-ish items on the order of 1-10 characters. Longer items will take somewhat longer to hash.
-
-### Configuring to your needs
+### Manual configuration
 
 Looking at the chart above, estimate about how many items you want to store, and choose your acceptable false positive rate.
 
-If you are okay with a 5% false positive, 6 bits per items will do.  Multiply the number of bits by the number of items, and use the suggested number of hash rounds. 
+If you are okay with a 5% false positiverate, 6 bits per item will do.  Multiply the number of bits by the number of items you anticipate storing, and use the suggested number of hash rounds. 
 
-In this example, if you have 1M items, that gives you 6M bits at 4 hashes, so you'd use `create SaiBloom 6000000, 4` as your initializer.
+In this example, if you have 1M items at a 5% false positive rate, that gives you 6M bits at 4 hashes, so you'd use `create SaiBloom 6000000, 4` as your initializer.
 
-### Autoconfiguration
+### Automatic configuration
 
 You can also autoconfigure the filter by initializing it with an estimated number of items and an allowed failure rate.  
 

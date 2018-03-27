@@ -1,11 +1,13 @@
 {
   "name": "sai-bloom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Object-oriented bloom filter written in SAI.",
   "main": "lib/saibloom.js",
   "scripts": {
+    "prepack": "rm readme.md && cp src/saibloom.md readme.md",
     "prepare": "sai-build -o lib src",
-    "test": "sai-build -o lib src && cd test && sai-run test.sai"
+    "test": "sai-build -o lib src && cd test && sai-run test.sai && node test.js",
+    "postpack": "rm readme.md && ln -s src/saibloom.md readme.md"
   },
   "keywords": [
     "bloom filter",
@@ -15,7 +17,7 @@
     "sai-library": "^1.0.17"
   },
   "devDependencies": {
-    "sai-language": "^0.2.4"
+    "sai-language": "~0.2.4"
   },
   "repository": {
     "type": "git",
