@@ -51,15 +51,16 @@ Instantiate task
     set success to true
   assert success, "garbage autoconfig should have failed"
 
+
   debug "Bloom filter looks good."
   
 
-Characterize task
+Speed task
 
   set t1 new ~Date
-  set d 10000
+  set d 1000000
   set found 0
-  set bloom to create SaiBloom d*3, 2
+  set bloom to create SaiBloom: size d, rate 0.05
   count d
     bloom.Add counter
   set t2 new ~Date
@@ -81,7 +82,8 @@ Characterize task
   debug "Time to check ${d*10} items, 90% there: ${t4-t3}ms."
   debug "Got ${10*found/d}% false positives"
   
-  
+Characterize task
+
   set d 100000
   set results empty
 

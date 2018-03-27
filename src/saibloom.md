@@ -25,7 +25,7 @@ Note that SaiBloom is not a 'counting' filter, as described above. One cannot re
 
 The filter does not get slower (or take up more memory) when more things are added. The configuration size of the filter is the final size. Adding more items just gradually increases the probability of false positives.
 
-Roughly 4-5M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. (This estimate is for short-ish items on the order of 1-10 characters. Longer items will take somewhat longer to hash.)
+Roughly 4M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. This estimate is for items on the order of 1-10 characters, with an acceptable false positive rate of about 5%. Longer items and more accurate filters will take slightly longer.)
 
 ### False positives characterization
 
@@ -331,7 +331,7 @@ Additional rounds of bit mixing to apply for Bloom bit distributions.
     FNV_1A_B task given a
       return FNV_MIX( FNV_MULTIPLY( a ) )
 
-FNV multiplication, essentially `a * 16777619` but done in such a way it doesn't cascade into a float.
+FNV multiplication, essentially `a * 16777619` but done in such a way it doesn't cascade into a float and lose precision.
 
     FNV_MULTIPLY unbound task given a
       return a + (a lsh 1) + (a lsh 4) + (a lsh 7) + (a lsh 8) + (a lsh 24)
