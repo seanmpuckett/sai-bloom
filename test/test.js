@@ -16,7 +16,7 @@ var prototype=new function() {
 }();
 var $AI=require("sai-library");
 // Generated code follows
-var __context={"loader":"SAI.GetSourceFromFilename","path":"test.sai","mtime":"2018-03-27T13:48:14.447Z","fetched":"2018-03-27T13:48:17.164Z"};
+var __context={"loader":"SAI.GetSourceFromFilename","path":"test/test.sai","mtime":"2018-03-28T13:13:44.749Z","fetched":"2018-03-28T13:14:01.362Z"};
 var _SaiBloom = '../lib/saibloom';
 var isa = prototype.isa = 'Test';
 var $bindfail = function(m) {
@@ -28,28 +28,28 @@ prototype.isof['Test'] = {
   context: __context,
   type: "main"
 };
-prototype.__tobelocked = prototype.__tobelocked.concat(["Instantiate", "Characterize", "isa"]);
+prototype.__tobelocked = prototype.__tobelocked.concat(["Instantiate", "Speed", "Characterize", "isa"]);
 prototype.__tobefrozen = prototype.__tobefrozen.concat(["isof"]);
 var $1g = prototype['Instantiate'] || function() {};
 prototype['Instantiate'] = function(p) {
-  var $0_counter, $1_stop, $2_step, $3_none, $4_counter, $5_stop, $6_step, $7_none, $8_error, $ = this['Instantiate'] ? this : $bindfail('Instantiate'),
-    $_c, $_d, _bloom, _newbloom, _state, _success; {
+  var $0_counter, $1_stop, $2_step, $3_none, $4_counter, $5_stop, $6_step, $7_none, $ = this['Instantiate'] ? this : $bindfail('Instantiate'),
+    $_c, $_d, _bloom, _newbloom, _state; {
     _bloom = $AI.create_op(_SaiBloom, [Math.pow(2, 9), 5]);
-    /*@:13*/
-    _bloom.Add('hit the road, jack');
     /*@:15*/
-    $AI.assert((_bloom.Test('fnoop') === false), 'fnoop should not exist');
+    _bloom.Add('hit the road, jack');
     /*@:17*/
+    $AI.assert((_bloom.Test('fnoop') === false), 'fnoop should not exist');
+    /*@:19*/
     $AI.assert((_bloom.Test('hit the road, jack') === true), 'hit the road, jack should exist');
-    /*@:18*/
-    _bloom = $AI.create_op(_SaiBloom, [1000, 4]);
     /*@:20*/
-    _bloom.Add(1);
-    /*@:21*/
-    $AI.assert((_bloom.Test(1) === true), 'digit 1 should exist');
+    _bloom = $AI.create_op(_SaiBloom, [1000, 4]);
     /*@:22*/
-    $AI.assert((_bloom.Test(2) === false), 'digit 2 should not exist');
+    _bloom.Add(1);
     /*@:23*/
+    $AI.assert((_bloom.Test(1) === true), 'digit 1 should exist');
+    /*@:24*/
+    $AI.assert((_bloom.Test(2) === false), 'digit 2 should not exist');
+    /*@:25*/
     var $0_counter = 0,
       $1_stop = 100,
       $2_step = 1;
@@ -57,11 +57,11 @@ prototype['Instantiate'] = function(p) {
     for (; $0_counter < $1_stop; $0_counter = $0_counter + $2_step) {
       _bloom.Add($0_counter);;
     }
-    /*@:26*/
-    $AI.assert((Math.floor((_bloom.Cardinality() * 100)) === 9995), 'cardinality of 100 adds should be about 99.95');
-    /*@:27*/
-    _state = _bloom.state;
     /*@:28*/
+    $AI.assert((Math.floor((_bloom.Cardinality() * 100)) === 9995), 'cardinality of 100 adds should be about 99.95');
+    /*@:29*/
+    _state = _bloom.state;
+    /*@:30*/
     var $4_counter = 0,
       $5_stop = 1000,
       $6_step = 1;
@@ -69,119 +69,122 @@ prototype['Instantiate'] = function(p) {
     for (; $4_counter < $5_stop; $4_counter = $4_counter + $6_step) {
       _bloom.Add($4_counter);;
     }
-    /*@:30*/
+    /*@:32*/
     $AI.assert((Math.floor((_bloom.Cardinality() * 100)) === 95042), 'cardinality of 1000 adds should be about 950.42');
-    /*@:31*/
-    _bloom = $AI.create_op(_SaiBloom, [20, 10]);
     /*@:33*/
-    _bloom.Add('number one crush');
-    /*@:34*/
-    $AI.assert(_bloom.Test('number one crush'), 'crush test should find added key');
+    _bloom = $AI.create_op(_SaiBloom, [20, 10]);
     /*@:35*/
-    $AI.assert((!(_bloom.Test('number two crush'))), 'crush test should not find non-added key');
+    _bloom.Add('number one crush');
     /*@:36*/
-    _bloom = undefined;
+    $AI.assert(_bloom.Test('number one crush'), 'crush test should find added key');
+    /*@:37*/
+    $AI.assert((!(_bloom.Test('number two crush'))), 'crush test should not find non-added key');
     /*@:38*/
-    _newbloom = $AI.create_op(_SaiBloom, [_state]);
-    /*@:39*/
-    $AI.assert((_newbloom.Test(1) === true), 'restored filter should have digit 1');
+    _bloom = undefined;
     /*@:40*/
-    $AI.assert((_newbloom.Test(101) === false), 'restored filter should not have digit 101');
+    _newbloom = $AI.create_op(_SaiBloom, [_state]);
     /*@:41*/
-    $AI.assert((Math.floor((_newbloom.Cardinality() * 100)) === 9995), 'restored filter should have cardinality of about 99.95');
+    $AI.assert((_newbloom.Test(1) === true), 'restored filter should have digit 1');
     /*@:42*/
+    $AI.assert((_newbloom.Test(101) === false), 'restored filter should not have digit 101');
+    /*@:43*/
+    $AI.assert((Math.floor((_newbloom.Cardinality() * 100)) === 9995), 'restored filter should have cardinality of about 99.95');
+    /*@:44*/
     _bloom = $AI.create_op(_SaiBloom, [{
       size: 50,
       rate: 0.1
     }]);
-    /*@:44*/
-    $AI.assert((_bloom.bits === 256), 'autoconfigure bits should be 256');
-    /*@:45*/
-    $AI.assert((_bloom.rounds === 4), 'autoconfigure rounds should be 4');
     /*@:46*/
-    _success = false;
+    $AI.assert((_bloom.bits === 256), 'autoconfigure bits should be 256 not ' + _bloom.bits);
+    /*@:47*/
+    $AI.assert((_bloom.rounds === 4), 'autoconfigure rounds should be 4 not ' + _bloom.rounds);
     /*@:48*/
-    try {
-      _bloom = $AI.create_op(_SaiBloom, [{
-        size: 50,
-        rate: (0 - (4))
-      }]);
-    } catch ($8_error) {
-      _success = true;
-    }
-    /*@:52*/
-    $AI.assert(_success, 'garbage autoconfig should have failed');
-    /*@:53*/
+    _bloom = $AI.create_op(_SaiBloom, [{
+      size: 50,
+      rate: 0
+    }]);
+    /*@:50*/
+    $AI.assert((_bloom.rounds === 16), 'autoconfigure rounds of out of range rate should be 16 not ' + _bloom.rounds);
+    /*@:51*/
     $AI.debug_op('Bloom filter looks good.');
-    /*@:55*/
+    /*@:54*/
   }
 };
-var $2g = prototype['Characterize'] || function() {};
-prototype['Characterize'] = function(p) {
-  var $10_counter, $11_stop, $12_step, $13_none, $14_trial, $15_trial, $16_counter, $17_stop, $18_step, $19_none, $20_trial, $21_trial, $22_counter, $23_stop, $24_step, $25_none, $26_counter, $27_stop, $28_step, $29_none, $30_trial, $31_trial, $32_counter, $33_stop, $34_step, $35_none, $36_trial, $37_counter, $38_stop, $39_step, $40_none, $41_stop, $42_step, $43_none, $44_this, $45_key, $46_stop, $47_step, $48_none, $9_this, $ = this['Characterize'] ? this : $bindfail('Characterize'),
-    $_c, $_d, _Format, _NiceNum, _bits, _bloom, _d, _d10, _found, _fp, _results, _rounds, _t1, _t2, _t3, _t4, _whatever; {
+var $2g = prototype['Speed'] || function() {};
+prototype['Speed'] = function(p) {
+  var $10_stop, $11_step, $12_none, $13_trial, $14_trial, $15_counter, $16_stop, $17_step, $18_none, $19_trial, $20_trial, $21_counter, $22_stop, $23_step, $24_none, $25_counter, $26_stop, $27_step, $28_none, $8_this, $9_counter, $ = this['Speed'] ? this : $bindfail('Speed'),
+    $_c, $_d, _bloom, _d, _d10, _found, _t1, _t2, _t3, _t4; {
     _t1 = new Date();
+    /*@:59*/
+    _d = 1000000;
     /*@:60*/
-    _d = 10000;
-    /*@:61*/
     _found = 0;
+    /*@:61*/
+    _bloom = $AI.create_op(_SaiBloom, [{
+      size: _d,
+      rate: 0.05
+    }]);
     /*@:62*/
-    _bloom = $AI.create_op(_SaiBloom, [(_d * 3), 2]);
-    /*@:63*/
-    var $10_counter = 0,
-      $11_stop = _d,
-      $12_step = 1;
-    if ($12_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
-    for (; $10_counter < $11_stop; $10_counter = $10_counter + $12_step) {
-      _bloom.Add($10_counter);;
+    var $9_counter = 0,
+      $10_stop = _d,
+      $11_step = 1;
+    if ($11_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
+    for (; $9_counter < $10_stop; $9_counter = $9_counter + $11_step) {
+      _bloom.Add($9_counter);;
     }
-    /*@:65*/
+    /*@:64*/
     _t2 = new Date();
-    /*@:66*/
-    var $16_counter = 0,
-      $17_stop = (_d * 10),
-      $18_step = 1;
-    if ($18_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
-    for (; $16_counter < $17_stop; $16_counter = $16_counter + $18_step) {
-      if ($15_trial = (_bloom.Test($16_counter))) {
-        if ($14_trial = (($16_counter >= _d))) {
+    /*@:65*/
+    var $15_counter = 0,
+      $16_stop = (_d * 10),
+      $17_step = 1;
+    if ($17_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
+    for (; $15_counter < $16_stop; $15_counter = $15_counter + $17_step) {
+      if ($14_trial = (_bloom.Test($15_counter))) {
+        if ($13_trial = (($15_counter >= _d))) {
           _found = (_found || 0) + 1;
         }
       };
     }
-    /*@:70*/
+    /*@:69*/
     _t3 = new Date();
-    /*@:71*/
+    /*@:70*/
     _d10 = Math.floor((_d / 10));
-    /*@:72*/
-    var $26_counter = 0,
-      $27_stop = 10,
-      $28_step = 1;
-    if ($28_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
-    for (; $26_counter < $27_stop; $26_counter = $26_counter + $28_step) {
-      var $22_counter = _d10,
-        $23_stop = (_d + _d10),
-        $24_step = 1;
-      if ($24_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
-      for (; $22_counter < $23_stop; $22_counter = $22_counter + $24_step) {
-        if ($21_trial = (_bloom.Test($22_counter))) {
-          if ($20_trial = (($22_counter >= _d))) {
+    /*@:71*/
+    var $25_counter = 0,
+      $26_stop = 10,
+      $27_step = 1;
+    if ($27_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
+    for (; $25_counter < $26_stop; $25_counter = $25_counter + $27_step) {
+      var $21_counter = _d10,
+        $22_stop = (_d + _d10),
+        $23_step = 1;
+      if ($23_step <= 0) throw new Error("SAI Runtime: COUNT STEP value should be positive.");
+      for (; $21_counter < $22_stop; $21_counter = $21_counter + $23_step) {
+        if ($20_trial = (_bloom.Test($21_counter))) {
+          if ($19_trial = (($21_counter >= _d))) {
             _found = (_found || 0) + 1;
           }
         };
       };
     }
-    /*@:77*/
+    /*@:76*/
     _t4 = new Date();
-    /*@:78*/
+    /*@:77*/
     $AI.debug_op('Time to add ' + _d + ' items: ' + (_t2 - _t1) + 'ms.');
-    /*@:80*/
+    /*@:79*/
     $AI.debug_op('Time to check ' + (_d * 10) + ' items, 90% not there: ' + (_t3 - _t2) + 'ms.');
-    /*@:81*/
+    /*@:80*/
     $AI.debug_op('Time to check ' + (_d * 10) + ' items, 90% there: ' + (_t4 - _t3) + 'ms.');
-    /*@:82*/
+    /*@:81*/
     $AI.debug_op('Got ' + (10 * (_found / _d)) + '% false positives');
-    /*@:83*/
+    /*@:82*/
+  }
+};
+var $3g = prototype['Characterize'] || function() {};
+prototype['Characterize'] = function(p) {
+  var $29_this, $30_trial, $31_trial, $32_counter, $33_stop, $34_step, $35_none, $36_trial, $37_counter, $38_stop, $39_step, $40_none, $41_stop, $42_step, $43_none, $44_this, $45_key, $46_stop, $47_step, $48_none, $ = this['Characterize'] ? this : $bindfail('Characterize'),
+    $_c, $_d, _Format, _NiceNum, _bits, _bloom, _d, _fp, _results, _rounds, _t1, _t2, _whatever; {
     _d = 100000;
     /*@:86*/
     _results = [];

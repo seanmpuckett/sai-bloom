@@ -1,6 +1,6 @@
 {
   "name": "sai-bloom",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Object-oriented bloom filter written in SAI.",
   "main": "lib/saibloom.js",
   "scripts": {

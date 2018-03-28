@@ -9,6 +9,8 @@ object Test main
 
 Instantiate task
 
+  //Speed
+
   set bloom to create SaiBloom 2**9, 5
   
   bloom.Add "hit the road, jack"
@@ -41,15 +43,11 @@ Instantiate task
   assert Math.floor(newbloom.Cardinality()*100) is 9995, "restored filter should have cardinality of about 99.95"
 
   set bloom to create SaiBloom: size 50, rate 0.1
-  assert bloom.bits is 256, "autoconfigure bits should be 256"
-  assert bloom.rounds is 4, "autoconfigure rounds should be 4"
+  assert bloom.bits is 256, "autoconfigure bits should be 256 not ${bloom.bits}"
+  assert bloom.rounds is 4, "autoconfigure rounds should be 4 not ${bloom.rounds}"
 
-  set success to false
-  try
-    set bloom to create SaiBloom: size 50, rate -4
-  catch
-    set success to true
-  assert success, "garbage autoconfig should have failed"
+  set bloom to create SaiBloom: size 50, rate 0
+  assert bloom.rounds is 16, "autoconfigure rounds of out of range rate should be 16 not ${bloom.rounds}"
 
 
   debug "Bloom filter looks good."

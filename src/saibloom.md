@@ -84,6 +84,8 @@ The above configuration case would be `create SaiBloom: size 1000000, rate 0.05`
 
 It's important to note that even if you ask for a zero false positive rate, there is no ironclad guarantee that you will not get a false positive eventually. Do not rely on this for important things.
 
+Automatic configuration uses an equation derived from the empirical data. 
+
 
 ## Examples
 
@@ -139,30 +141,6 @@ Instance variables:
       bits 0            // number of bits in the bloom filter (rounded to 32)
       rounds 0          // number of hash rounds (bits to set per Add)
 
-Static data:
-
-    given:
-      autoconfig:
-        : 0.4008,  2,  2   // derived from the profiling
-        : 0.2373,  3,  2   // an array of arrays
-        : 0.1475,  4,  3   //  .0  false positive rate
-        : 0.0915,  5,  4   //  .1  number of bits 
-        : 0.0560,  6,  4   //  .2  number of rounds
-        : 0.0348,  7,  5
-        : 0.0216,  8,  6
-        : 0.0133,  9,  6
-        : 0.0082, 10,  7
-        : 0.0050, 11,  7
-        : 0.0032, 12,  8
-        : 0.0019, 13,  9
-        : 0.0011, 14,  9
-        : 0.0007, 15, 10
-        : 0.0004, 16, 10
-        : 0.0002, 17, 11
-        : 0.0001, 18, 11
-        : 0.0000, 20, 15   // fencepost: still no guarantee of never getting a false positive
-
-
 
 ### .state attribute
 
@@ -210,11 +188,11 @@ Implemenation:
         set state p
         
       elsif p.size    // did we get an autoconfiguration request?
-        ply autoconfig
-          if .0 < p.rate
-            Configure .1 * p.size, .2
-            return
-        throw new Error "SaiBloom unable to autoconfigure with parameters size:${p.size} rate:${p.rate}."
+        assert p.rate<0.5, "SaiBloom autoconfiguration error, rate should be less than 0.5 (not ${p.rate}) -- percentages must be decimal, e.g. 5% is 0.05."
+        set rate to (p.rate ?> 0.00001) ?< 0.5
+        set b to (Math.log(rate) * -2) + 0.5
+        set r to Math.ceil( b * 0.66 )
+        Configure b * p.size, r
 
       else            // assume we got manual configuration
         Configure p, rounds_
@@ -254,7 +232,7 @@ The item is marked as having been added, though you cannot recover or remove it 
         b to FNV_1A_B(a)
         x to a % bits
       
-      count rounds as i
+      count rounds 
         set loc to x<0 ?? (x+bits) :: x
         set buckets[loc rsh 5] orb (1 lsh (loc andb 0x1f))
         set x to (self+b) % bits
@@ -281,7 +259,7 @@ Implementation:
         b to FNV_1A_B(a)
         x to a % bits
       
-      count rounds as i
+      count rounds 
         set loc to x<0 ?? (x+bits) :: x
         unless buckets[loc rsh 5] andb (1 lsh (loc andb 0x1f))
           return false
