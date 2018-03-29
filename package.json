@@ -1,6 +1,6 @@
 {
   "name": "sai-bloom",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Object-oriented bloom filter written in SAI.",
   "main": "lib/saibloom.js",
   "scripts": {
@@ -14,10 +14,10 @@
     "sai"
   ],
   "dependencies": {
-    "sai-library": "^1.0.17"
+    "sai-library": "~1.0.19"
   },
   "devDependencies": {
-    "sai-language": "~0.2.4"
+    "sai-language": "~0.2.5"
   },
   "repository": {
     "type": "git",

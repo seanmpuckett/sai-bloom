@@ -84,8 +84,6 @@ The above configuration case would be `create SaiBloom: size 1000000, rate 0.05`
 
 It's important to note that even if you ask for a zero false positive rate, there is no ironclad guarantee that you will not get a false positive eventually. Do not rely on this for important things.
 
-Automatic configuration uses an equation derived from the empirical data. 
-
 
 ## Examples
 
@@ -189,7 +187,7 @@ Implemenation:
         
       elsif p.size    // did we get an autoconfiguration request?
         assert p.rate<0.5, "SaiBloom autoconfiguration error, rate should be less than 0.5 (not ${p.rate}) -- percentages must be decimal, e.g. 5% is 0.05."
-        set rate to (p.rate ?> 0.00001) ?< 0.5
+        set rate to p.rate ?> 0.00001
         set b to (Math.log(rate) * -2) + 0.5
         set r to Math.ceil( b * 0.66 )
         Configure b * p.size, r
