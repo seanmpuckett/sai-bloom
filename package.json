@@ -4,10 +4,10 @@
   "description": "Fast, efficient and easy to use Bloom filter.",
   "main": "lib/saibloom.js",
   "scripts": {
-    "prepack": "rm readme.md && cp src/saibloom.md readme.md",
+    "prepack": "rm readme.md && cp src/saibloom.sai.md readme.md",
     "prepare": "sai-build -v -o lib src",
     "test": "sai-build -o lib src && cd test && sai-run test.sai && node test.js",
-    "postpack": "rm readme.md && ln -s src/saibloom.md readme.md"
+    "postpack": "rm readme.md && ln -s src/saibloom.sai.md readme.md"
   },
   "keywords": [
     "bloom filter",
