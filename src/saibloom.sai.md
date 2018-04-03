@@ -1,13 +1,83 @@
-# Bloom Filter (in SAI)
-
-Code is based on a Javascript implementation at <https://github.com/jasondavies/bloomfilter.js>.
-
-Note: Assumes platform support for Uint32Array, which is a pretty safe assumption in the node ecosystem.
-
-Written by Sean M Puckett <mailto:seanmpuckett@gmail.com>.  MIT License (appears at end of file).
+# Bloom Filter 
 
 _This package is usable in pure Javascript projects. SAI is only needed to recompile it._
 
+Based on a Javascript implementation at <https://github.com/jasondavies/bloomfilter.js>.
+
+Assumes platform support for Uint32Array, which is a pretty safe assumption in the node ecosystem.
+
+Written by Sean M Puckett <mailto:seanmpuckett@gmail.com>.  MIT License (appears at end of file).
+
+
+### Performance
+
+The filter does not get slower (or take up more memory) when more things are added. The configuration size of the filter is the final size. Adding more items just gradually increases the probability of false positives.
+
+Roughly 4M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. This estimate is for items on the order of 1-10 characters, with an acceptable false positive rate of about 5%. Longer items and more accurate filters will take slightly longer.)
+
+
+### Configuration
+
+You can autoconfigure the filter by initializing it with an estimated number of items and an allowed failure rate.  
+
+Pass in an object with these attributes:
+
+- __size__: approximate number of items you'd like to store
+- __rate__: minimum acceptable rate of failure, as a decimal fraction (e.g. 5% = 0.05).
+
+The above configuration case would be `create SaiBloom: size 1000000, rate 0.05`.
+
+It's important to note that even if you ask for a zero false positive rate, there is no ironclad guarantee that you will not get a false positive eventually. Do not rely on this for important things.
+
+Manual configuration is also available.
+
+
+### Preserving state
+
+This filter offers a means to preserve and restore state using the `.state` attribute.  This allows you to e.g. precalculate a filter and save the state to disk for later use against live data.  To regenerate the filter, pass the structure you got from `.state` to the SaiBloom constructor.
+
+The native bit array is encoded as a base-90 ASCII-compliant string with values from 35 to 124. This is done for space efficiency.  
+
+
+## Examples
+
+### Javascript
+
+Manual configuration:
+    
+    var SaiBloom=require('sai-bloom').constructor           // example
+    var bloom=new SaiBloom(1000*10,7)       
+    bloom.Add(1)
+    console.log(bloom.Test(1)) // true
+    console.log(bloom.Test(2)) // false
+    
+Automatic configuration:
+
+    var bloom2=new SaiBloom({size: 10000, rate: 0.01});   // example
+
+
+### SAI
+
+Automatic configuration:
+
+    set bloom to create "SaiBloom": size 10000, rate 0.01   // example
+    bloom.Add 1
+    debug bloom.Test(1)    // true
+    debug bloom.Test(2)    // false
+
+Save and reload state:
+
+    set bloom to create "SaiBloom": size 100, rate 0.01     // example
+    count 50
+      bloom.Add counter
+    set filterstate to bloom.state
+    
+    set bloom2 to create "SaiBloom" filterstate
+    debug bloom2.Test(25)   // true
+    debug bloom2.Test(75)   // false
+
+
+## Abstract
 
 ### What's a Bloom filter?
 
@@ -20,12 +90,6 @@ From Wikipedia:
 > More generally, fewer than 10 bits per element are required for a 1% false positive probability, independent of the size or number of elements in the set.
 
 Note that SaiBloom is not a 'counting' filter, as described above. One cannot remove items from it.
-
-### Performance
-
-The filter does not get slower (or take up more memory) when more things are added. The configuration size of the filter is the final size. Adding more items just gradually increases the probability of false positives.
-
-Roughly 4M tests or insertions can be be performed per second, on a 2012 MacBook Pro Retina laptop, under node 9.3.0. This estimate is for items on the order of 1-10 characters, with an acceptable false positive rate of about 5%. Longer items and more accurate filters will take slightly longer.)
 
 ### False positives characterization
 
@@ -63,64 +127,6 @@ The number of _rounds_ affects the false positive rate. For each number of _bits
   
 Beyond 20 bits per item to be stored, there were no false positives found in the best row, though this is just a statistical null result rather than a provable one -- it is always _possible_ for a Bloom filter to fail, it just gets more and more unlikely the more bits have been set aside per item.
 
-### Manual configuration
-
-Looking at the chart above, estimate about how many items you want to store, and choose your acceptable false positive rate.
-
-If you are okay with a 5% false positiverate, 6 bits per item will do.  Multiply the number of bits by the number of items you anticipate storing, and use the suggested number of hash rounds. 
-
-In this example, if you have 1M items at a 5% false positive rate, that gives you 6M bits at 4 hashes, so you'd use `create SaiBloom 6000000, 4` as your initializer.
-
-### Automatic configuration
-
-You can also autoconfigure the filter by initializing it with an estimated number of items and an allowed failure rate.  
-
-Pass in an object with these attributes:
-
-- __size__: approximate number of items you'd like to store
-- __rate__: minimum acceptable rate of failure, as a decimal fraction (e.g. 5% = 0.05).
-
-The above configuration case would be `create SaiBloom: size 1000000, rate 0.05`.
-
-It's important to note that even if you ask for a zero false positive rate, there is no ironclad guarantee that you will not get a false positive eventually. Do not rely on this for important things.
-
-
-## Examples
-
-### Javascript
-
-Manual configuration:
-    
-    var SaiBloom=require('sai-bloom')                      // example
-    var bloom=new SaiBloom(1000*10,7)       
-    bloom.Add(1)
-    console.log(bloom.Test(1)) // true
-    console.log(bloom.Test(2)) // false
-    
-Automatic configuration:
-
-    var bloom2=new SaiBloom({size: 10000, rate: 0.01});   // example
-
-### SAI
-
-Automatic configuration:
-
-    set bloom to create SaiBloom: size 10000, rate 0.01   // example
-    bloom.Add 1
-    debug from bloom.Test 1    // true
-    debug from bloom.Test 2    // false
-
-Save and reload state:
-
-    set bloom to create SaiBloom: size 100, rate 0.01     // example
-    count 50
-      bloom.Add counter
-    set filterstate to bloom.state
-    
-    set bloom2 to create SaiBloom filterstate
-    debug from bloom2.Test 25   // true
-    debug from bloom2.Test 75   // false
-
 
 
 ## Implementation
@@ -150,15 +156,18 @@ Recover / restore the filter's current state.
 Implementation:
 
     state get
+      set codes new ~Array buckets.length
+      ply buckets
+        set codes\key Encode32to5(it)
       return:
         bits bits
         rounds rounds
-        buckets (empty).slice.call(buckets) // convert array-like object into actual array
+        encoded join'd codes ''
 
     set 
       Configure $bits, $rounds
-      ply $buckets
-        set buckets\key to it
+      count 0, $encoded.length, 5
+        set buckets[counter/5] to Decode32to5( $encoded, counter )
 
 
 
@@ -293,7 +302,7 @@ Count number of bits in a 32 bit integer.  Pretty cool parallel addition from <h
 
 Fowler/Noll/Vo string hash, the alternate (preferred) implementation.
 
-    FNV_1A task given v
+    FNV_1A unbound task given v
       set a to 2166136261
       count v's length as i
         set c to v.charCodeAt(i)
@@ -304,7 +313,7 @@ Fowler/Noll/Vo string hash, the alternate (preferred) implementation.
 
 Additional rounds of bit mixing to apply for Bloom bit distributions.
 
-    FNV_1A_B task given a
+    FNV_1A_B unbound task given a
       return FNV_MIX( FNV_MULTIPLY( a ) )
 
 FNV multiplication, essentially `a * 16777619` but done in such a way it doesn't cascade into a float and lose precision.
@@ -323,6 +332,27 @@ FNV bit mixer, see <https://web.archive.org/web/20131019013225/http://home.comca
         a + (self lsh 5)
         a andb 0xffffffff
       return a
+
+Encode a 32 bit unsigned integer as a five character string. Characters from ASCII 35 to 124 are used.
+
+    Encode32to5 unbound task as i
+      set v ''
+      count 5
+        set p to i % 90
+        set v + ~String.fromCharCode(35+p)
+        set i to (self-p)/90
+      return v
+
+Decode a 32 bit unsigned integer from five characters in a string, encoded as above.
+    
+    Decode32to5 unbound task as s, pos
+      set pos ? 0
+      set i 0
+      set j 1
+      count 5
+        set i+(s.charCodeAt(pos+counter)-35)*j
+        set j*90
+      return i
 
 
 ### License

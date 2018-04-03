@@ -2,14 +2,19 @@
 
 
 reference:
-  SaiBloom  '../src/saibloom'
-
+  SaiBloomD  '../src/saibloom'
+  SaiBloomS  '../lib/saibloom'
 
 object Test main
+
+instance:
+  SaiBloom undefined
 
 Instantiate task
 
   //Speed
+
+  set SaiBloom to environment().dynamic ?? SaiBloomD :: SaiBloomS
 
   set bloom to create SaiBloom 2**9, 5
   
